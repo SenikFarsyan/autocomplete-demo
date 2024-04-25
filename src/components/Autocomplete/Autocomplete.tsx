@@ -34,9 +34,10 @@ function fixedForwardRef<T, P = object>(
 
 export interface Props<T> extends InputHTMLAttributes<HTMLInputElement> {
   fetchSuggestions: (term: string) => Promise<T[]>;
+  getValue: (item: T) => string;
   onItemSelect?: (value: T) => void;
   label?: string;
-  getValue: (item: T) => string;
+  minCharsToSearch?: number;
 }
 
 export const Autocomplete = fixedForwardRef(
@@ -47,6 +48,7 @@ export const Autocomplete = fixedForwardRef(
       getValue,
       onChange,
       onItemSelect,
+      minCharsToSearch = 2,
       ...inputProps
     }: Props<T>,
     ref: Ref<HTMLInputElement>
@@ -57,7 +59,7 @@ export const Autocomplete = fixedForwardRef(
     const menuRef = useRef<HTMLDivElement | null>(null);
 
     const handleDebounceSearch = useDebounce(async (term: string) => {
-      if (term.trim().length > 2) {
+      if (term.trim().length > minCharsToSearch) {
         try {
           const data = await fetchSuggestions(term);
           setSuggestions(data);
@@ -129,3 +131,7 @@ export const Autocomplete = fixedForwardRef(
     );
   }
 );
+
+//TODO add virtual scroll to prevent rendering of large list of suggestions
+//TODO work on accesability
+//TODO improve highlightMatch to find matches in nodes also
